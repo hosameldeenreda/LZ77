@@ -1,6 +1,6 @@
 package com.codebind;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 public class Tag {
     public int pos;
     public int len;
@@ -20,20 +20,10 @@ public class Tag {
         this.len=0;
         this.nex=' ';
     }
-    void read(RandomAccessFile f) throws IOException {
-        byte temp ;
-        temp = f.readByte();
-        pos =temp;
-        temp = f.readByte();
-        len =temp;
-        char tempch = 0;
-        tempch = f.readChar();
-        nex =tempch;
-    }
-    void write(RandomAccessFile f) throws IOException {
-        f.writeByte(pos);
-        f.writeByte(len);
-        f.writeChar(nex);
+    void write(FileWriter write) throws IOException {
+        write.append(pos+" ");
+        write.append(len+" ");
+        write.append(Integer.valueOf(nex)+" ");
     }
 
 }

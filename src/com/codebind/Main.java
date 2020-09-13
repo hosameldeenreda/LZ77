@@ -8,8 +8,8 @@ public class Main {
         File original,compressed,uncompressed;
         original=new File("original.txt");
         compressed=new File("com.txt");
-       // uncompressed=new File("uncom.txt");
+        uncompressed=new File("uncom.txt");
         LZ77.compress(original,compressed);
-        //LZ77.decompres(compressed,uncompressed);
+        LZ77.decompress(compressed,uncompressed);
     }
 }

@@ -2,7 +2,6 @@ package com.codebind;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Scanner;
 class LZ77 {
     static final int windowSize=8;
@@ -21,7 +20,8 @@ class LZ77 {
                         if (text.charAt(k) == text.charAt(ii)) {
                             ii++;
                             len++;
-                        } else
+                        }
+                        else
                             break;
                     }
                     if (len > maxLength) {
@@ -36,38 +36,15 @@ class LZ77 {
         }
         return outputTags;
     }
-    private static String decompres(ArrayList<Integer> tags){
-        if(tags.size()==0)
-            throw new RuntimeException("tags cannot be empty or null");
+    private static String decompress(ArrayList<Tag> tags){
         String text="";
-        Hashtable<Integer, String> dictionary = new Hashtable<>();
-        String old= String.valueOf((char)tags.get(0).intValue());
-        text+=old;
-        int dictionaryCounter=256;//out of ascii
-        for (int currentTag : tags.subList(1,tags.size())){
-            if(currentTag<256){
-                // tag is represent one character
-                text+=(char)currentTag;
-                dictionary.put(dictionaryCounter,old+(char)currentTag);
-                dictionaryCounter++;
-                old= String.valueOf((char)currentTag);
-            }
-            else{
-                String temp=dictionary.getOrDefault(currentTag, "-1");
-                if (!temp.equals("-1")) {
-                    //found at dictionary
-                    text+=temp;
-                    dictionary.put(dictionaryCounter,old+temp.charAt(0));
-                    old= temp;
-                }
-                else{
-                    text+=(old+old.charAt(0));
-                    dictionary.put(dictionaryCounter,old+old.charAt(0));
-                    old+=old.charAt(0);
-                }
-                dictionaryCounter++;
-            }
+        for(int i=0;i<tags.size();i++){
+            Tag temp=tags.get(i);
+            for(int j=text.length()-temp.pos,k=0;k<temp.len;j++,k++)
+                text+=text.charAt(j);
+            text+=temp.nex;
         }
+        System.out.println(text);
         return text;
     }
     private static String readTextFile(File file) throws IOException {
@@ -77,22 +54,22 @@ class LZ77 {
         sc.useDelimiter("\\Z");
         return (sc.next());
     }
-    private static void writeTags(File file,ArrayList<Integer> tags)throws IOException {
+    private static void writeTags(File file,ArrayList<Tag> tags)throws IOException {
         file.createNewFile(); // if file already exists will do nothing
         FileWriter write = new FileWriter(file);
-        for (int currentTag : tags) {
-            write.append(currentTag+" ");
+        for (Tag currentTag : tags) {
+            currentTag.write(write);
         }
         write.flush();
         write.close();
     }
-    private static ArrayList<Integer> readTagsFromFile(File file) throws IOException {
+    private static ArrayList<Tag> readTagsFromFile(File file) throws IOException {
         if(!file.exists())
             throw new RuntimeException("file not found");
         Scanner sc = new Scanner(file);
-        ArrayList<Integer> tags=new ArrayList<>();
+        ArrayList<Tag> tags=new ArrayList<>();
         while (sc.hasNextInt()){
-            tags.add(sc.nextInt());
+            tags.add(new Tag(sc.nextInt(),sc.nextInt(), (char) sc.nextInt()));
         }
         return tags;
     }
@@ -106,17 +83,17 @@ class LZ77 {
     public static  void compress(File  original,File compressed) throws IOException {
         try {
             ArrayList<Tag> tags = compress(readTextFile(original));
-            for(int i=0;i<tags.size();i++){
+            /*for(int i=0;i<tags.size();i++){
                 System.out.println(tags.get(i).pos+" "+tags.get(i).len+" "+tags.get(i).nex);
-            }
-            //writeTags(compressed, tags);
+            }*/
+            writeTags(compressed, tags);
         }  catch (Exception ex) {
             System.out.print(ex.toString());
         }
     }
-    public static void decompres(File  compressed,File uncompressed) throws IOException {
+    public static void decompress(File  compressed,File uncompressed) throws IOException {
         try{
-            writeText(uncompressed,decompres(readTagsFromFile(compressed)));
+            writeText(uncompressed,decompress(readTagsFromFile(compressed)));
         }  catch (Exception ex) {
             System.out.print(ex.toString());
         }

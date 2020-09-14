@@ -5,10 +5,19 @@ import java.util.ArrayList;
 import java.util.Scanner;
 class LZ77 {
     static final int windowSize=8;
+    private static void checkIfTextIsEmpty(String text){
+        if(text.length()==0) {
+            System.out.println("hosaasasasa");
+            throw new RuntimeException("text cannot be empty String or null");
+        }
+    }
+    private static void checkIfFileIsExist(File file){
+        if(!file.exists())
+            throw new RuntimeException("file not found");
+    }
     private static  ArrayList<Tag> compress(String  text){
         int textLength=text.length();
-        if(textLength==0)
-            throw new RuntimeException("text cannot be empty String or null");
+        checkIfTextIsEmpty(text);
         ArrayList<Tag> outputTags = new ArrayList<>();
         outputTags.add(new Tag(0,0,text.charAt(0)));
         for(int i=1;i<textLength;i++){
@@ -44,12 +53,10 @@ class LZ77 {
                 text+=text.charAt(j);
             text+=temp.nex;
         }
-        System.out.println(text);
         return text;
     }
     private static String readTextFile(File file) throws IOException {
-        if(!file.exists())
-            throw new RuntimeException("file not found");
+        checkIfFileIsExist(file);
         Scanner sc = new Scanner(file);
         sc.useDelimiter("\\Z");
         return (sc.next());
@@ -64,8 +71,7 @@ class LZ77 {
         write.close();
     }
     private static ArrayList<Tag> readTagsFromFile(File file) throws IOException {
-        if(!file.exists())
-            throw new RuntimeException("file not found");
+        checkIfFileIsExist(file);
         Scanner sc = new Scanner(file);
         ArrayList<Tag> tags=new ArrayList<>();
         while (sc.hasNextInt()){
@@ -83,9 +89,6 @@ class LZ77 {
     public static  void compress(File  original,File compressed) throws IOException {
         try {
             ArrayList<Tag> tags = compress(readTextFile(original));
-            /*for(int i=0;i<tags.size();i++){
-                System.out.println(tags.get(i).pos+" "+tags.get(i).len+" "+tags.get(i).nex);
-            }*/
             writeTags(compressed, tags);
         }  catch (Exception ex) {
             System.out.print(ex.toString());
